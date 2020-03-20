@@ -798,7 +798,7 @@ Login
 
     input text   css=.qa_input_cost     ${value_amount}
     sleep  1
-    Run Keyword If  '${tax}' == 'True'     click element   xpath=(//input[contains(@class, 'qa_checkbox_pdv')])[1]
+    Run Keyword If  '${tax}' == 'True'     click element   xpath=(//input[contains(@class, 'qa_checkbox_pdv')])[2]
 
     #############################Добавление milestones(Додати умови оплати)#######################################
 
@@ -840,7 +840,7 @@ Login
     sleep  1
     input text  css=.qa_winner_amount   ${value_amount}
     sleep  1
-    Run Keyword If  '${tax}' == 'True'   click element  xpath=(//input[contains(@class, 'qa_checkbox_pdv')])[2]
+    Run Keyword If  '${tax}' == 'True'   click element  xpath=(//input[contains(@class, 'qa_checkbox_pdv')])[3]
     sleep  1
     input text  css=.qa_winner_name   ${contact_name}
     sleep  1
@@ -2179,9 +2179,9 @@ Login
 Отримати інформацію із лота тендера
     [Arguments]      ${field_name}
     log to console  ***Отримати інформацію із лота тендера***
-    ${return_value}=    Run Keyword If   '${procurement_method_type}' == 'belowThreshold'       Отримати інформацію із лота тендер belowThreshold      ${field_name}
-    ...  ELSE IF    '${procurement_method_type}' == 'negotiation'          Отримати інформацію із лота тендера negotiation        ${field_name}
-    ...  ELSE IF    '${procurement_method_type}' == 'reporting'          Отримати інформацію із лота тендера negotiation        ${field_name}
+    ${return_value}=    Run Keyword If   '${procurement_method_type}' == 'belowThreshold'       Отримати інформацію із лота тендер belowThreshold       ${field_name}
+    ...  ELSE IF    '${procurement_method_type}' == 'negotiation'           Отримати інформацію із лота тендера negotiation                             ${field_name}
+    ...  ELSE IF    '${procurement_method_type}' == 'reporting'             Отримати інформацію із лота тендера negotiation                             ${field_name}
     ...  ELSE    Отримати інформацію із лота тендера для остальных      ${field_name}
     [Return]  ${return_value}
 
@@ -3000,6 +3000,21 @@ Login
     sleep  4
     reload page
 
+Змінити документацію в ставці
+  [Arguments]  ${username}  ${tender_uaid}  ${doc_data}  ${doc_id}
+  log to console  ***Змінити документацію в ставці***
+  log to console  ${doc_data}
+  Wait Until Page Contains Element      css=.qa_edit_offer     10
+  Sleep   5
+  Click Element       css=.qa_edit_offer
+  Sleep   3
+  Wait Until Page Contains Element     css=[data-qa="add_file"]
+  Choose File         xpath=//span[contains(text(), '${docid}')]/../../../..//input[@name="files"]
+  Sleep   10
+  Click Element       css=[data-qa="submit_payment"]
+  sleep  4
+  reload page
+
 Змінити документ в ставці
     [Arguments]  ${username}  ${tender_uaid}  ${path}  ${docid}
     log to console  _)_)_)_)_)_)_)_)_)_
@@ -3567,8 +3582,8 @@ Login
 Підтвердити підписання контракту для інших процедур
     [Arguments]    ${username}   ${tender_uaid}   ${contract_num}
     log to console  ***Підтвердити підписання контракту для інших процедур***
-    CLICK ELEMENT    css=.qa_lot_button
-    Wait Until Element Is Visible   css=.qa_lot_title     10
+    Run Keyword If  '${KeyIslot}' == 'True'    CLICK ELEMENT    css=.qa_lot_button
+    Run Keyword If  '${KeyIslot}' == 'True'    Wait Until Element Is Visible   css=.qa_lot_title     10
     Wait Until Keyword Succeeds     300      10          Run Keywords
     ...   Sleep  3
     ...   AND     Reload Page
@@ -3708,14 +3723,10 @@ Login
     log to console  ***Редагувати угоду belowThreshold***
     log to console  ${fieldname}
     log to console  ${fieldvalue}
-    CLICK ELEMENT    css=.qa_lot_button
-    Wait Until Element Is Visible   css=.qa_lot_title     10
-    Wait Until Keyword Succeeds     300      10          Run Keywords
-    ...   Sleep  3
-    ...   AND     Reload Page
-    ...   AND     sleep   2
-    ...   AND     Wait Until Element Is Enabled       css=[href*='state_purchase_lot/complete']
-    click element  css=[href*='state_purchase_lot/complete']
+    Run Keyword If  '${KeyIslot}' == 'True'     CLICK ELEMENT    css=.qa_lot_button
+    Run Keyword If  '${KeyIslot}' == 'True'     Wait Until Element Is Visible   css=.qa_lot_title     10
+    Run Keyword If  '${KeyIslot}' == 'True'     click element  css=[href*='state_purchase_lot/complete']
+    Run Keyword If  '${KeyIslot}' == 'False'    click element  css=[href*='state_purchase/complete']
     Wait Until Element Is Visible   css=#contract_number     10
     ${filepath}=        create_random_file
     choose file    xpath=//input[contains(@class, 'qa_state_offer_add_field')]   ${filepath}
@@ -3723,6 +3734,10 @@ Login
     input text  css=#contract_number    12355
     sleep   3
     Run Keyword If  "${TEST NAME}" == 'Можливість редагувати вартість угоди без урахування ПДВ'     Можливість редагувати вартість угоди без урахування ПДВ     ${fieldname}  ${fieldvalue}  ${username}  ${tender_uaid}
+    click element   xpath=//span[text()='Завантажити']
+    Run Keyword If  '${KeyIslot}' == 'True'     Wait Until Element Is Visible   css=.qa_lot_title              30
+    Run Keyword If  '${KeyIslot}' == 'False'    Wait Until Element Is Visible   css=.qa_item_description       30
+    prom.Пошук тендера по ідентифікатору    ${username}  ${tender_uaid}
 
 Можливість редагувати вартість угоди без урахування ПДВ
     [Arguments]     ${fieldname}    ${fieldvalue}   ${username}  ${tender_uaid}
@@ -3742,9 +3757,6 @@ Login
     sleep  3
     input text  css=[name="contract_period_end"]            ${endDate}
     sleep  2
-    click element   xpath=//span[text()='Завантажити']
-    Wait Until Element Is Visible   css=.qa_lot_title     30
-    prom.Пошук тендера по ідентифікатору    ${username}  ${tender_uaid}
 
 Редагувати угоду negotiation
     [Arguments]    ${username}   ${tender_uaid}   ${contract_index}    ${fieldname}    ${fieldvalue}
@@ -4208,13 +4220,27 @@ Login
     Run Keyword If  '${already_ECP}' == 'True'  Click Element  css=#SignDataButton
     ...     ELSE    prom.Подписание ЕЦП
     sleep  6
+    Run Keyword If  '${KeyIslot}' == 'True'  Дочекатися загрузки договору у мультилот
+    ...    ELSE   Дочекатися загрузки договору у безлот
+    prom.Пошук тендера по ідентифікатору    ${username}  ${tender_uaid}
+
+Дочекатися загрузки договору у мультилот
+    log to console  ***Дочекатися загрузки договору у мультилот***
     Wait Until Keyword Succeeds     300      10          Run Keywords
     ...   Sleep  3
     ...   AND     Reload Page
     ...   AND     sleep   2
     ...   AND     Wait Until Element Is Enabled       css=[href*='state_purchase_lot/complete']
     sleep  3
-    prom.Пошук тендера по ідентифікатору    ${username}  ${tender_uaid}
+
+Дочекатися загрузки договору у безлот
+    log to console  ***Дочекатися загрузки договору у безлот***
+    Wait Until Keyword Succeeds     300      10          Run Keywords
+    ...   Sleep  3
+    ...   AND     Reload Page
+    ...   AND     sleep   2
+    ...   AND     Wait Until Element Is Enabled       css=[href*='state_purchase/complete']
+    sleep  3
 
 Підтвердити постачальника для closeFrameworkAgreementUA
     [Arguments]  ${username}  ${tender_uaid}  ${award_num}
