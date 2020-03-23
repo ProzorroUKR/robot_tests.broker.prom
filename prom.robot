@@ -4148,6 +4148,11 @@ Login
     click element        xpath=(//p[text()='${complaintID}']//../span)
     sleep  3
     ${satisfied}=      get from dictionary   ${confirmation_data.data}   satisfied
+    Wait Until Keyword Succeeds     300      10          Run Keywords
+    ...   Sleep  3
+    ...   AND     Reload Page
+    ...   AND     sleep   2
+    ...   AND     Wait Until Element Is Enabled        css=[data-qa="qa_status_satisfied"]
     run keyword if    '${satisfied}' == 'True'  click element  css=[data-qa="qa_status_satisfied"]
     sleep  2
     ${pop_up}=  Run Keyword And Return Status    Element Should Be Visible    css=[data-qa="qa_close_claim_dialog"]
@@ -4507,7 +4512,7 @@ Login
 ###############################################################################
 Отримати qualificationPeriod.endDate
     log to console  ***Отримати qualificationPeriod.endDate***
-    sleep   60
+    sleep   400
     Reload Page
     sleep  5
     ${return_value}=  run keyword if  '${procurement_method_type}' == 'closeFrameworkAgreementUA'   Отримати qualificationPeriod.endDate closeFrameworkAgreementUA
