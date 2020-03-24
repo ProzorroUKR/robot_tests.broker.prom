@@ -3004,13 +3004,23 @@ Login
   [Arguments]  ${username}  ${tender_uaid}  ${doc_data}  ${doc_id}
   log to console  ***Змінити документацію в ставці***
   log to console  ${doc_data}
+  ${confident_comment}=     Get From Dictionary     ${doc_data.data}    confidentialityRationale
   Wait Until Page Contains Element      css=.qa_edit_offer     10
   Sleep   5
   Click Element       css=.qa_edit_offer
   Sleep   3
+  ${filepath}=        create_random_file
   Wait Until Page Contains Element     css=[data-qa="add_file"]
-  Choose File         xpath=//span[contains(text(), '${docid}')]/../../../..//input[@name="files"]
+  Choose File        css=[data-qa="add_file"]      ${filepath}
   Sleep   10
+  click element  xpath=(//span[contains(text(), 'Конфіденційно')])[last()]
+  sleep  2
+  input text  css=[data-qa="confident_comment"]     ${confident_comment}
+  sleep  2
+  click element  xpath=(//div[@data-qa="file_type"])[last()]
+  sleep  2
+  click element  xpath=(//div[contains(text(), 'Цінова пропозиція')])[2]
+  sleep  2
   Click Element       css=[data-qa="submit_payment"]
   sleep  4
   reload page
